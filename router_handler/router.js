@@ -31,6 +31,31 @@ exports.getRouter = async (req, res) => {
     }
 }
 
+exports.getMenuList = async (req, res) => {
+    const sql = `SELECT * FROM router`
+    try {
+        const results = await query(sql)
+        let menuData = []
+        console.log(req.user)
+        if(req.user.authority != 'admin') {
+            let authority = req.user.authority.split(',')
+            menuData = results.filter(item => {
+                return item.jurisdiction == 0 || authority.includes(item.id)
+            })
+        } else {
+            menuData = results
+        }
+        console.log(results)
+        const treeData = buildTree(menuData)
+        res.send({
+            status: 0,
+            data: treeData,
+        })
+    } catch (err) {
+        res.cc(err)
+    }
+}
+
 // 添加或修改路由
 exports.addRouter = async (req, res) => {
     const route = req.body
