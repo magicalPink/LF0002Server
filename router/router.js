@@ -5,6 +5,8 @@ const routerHandler = require('../router_handler/router');
 router.get('/getList', routerHandler.getRouter);
 //添加路由
 router.post('/addRouter', routerHandler.addRouter);
+//删除路由
+router.get('/deleteRouter', routerHandler.deleteRouter);
 
 
 module.exports = router;
