@@ -15,9 +15,9 @@ function query(sql, values) {
 // 获取路由列表
 exports.getRouter = async (req, res) => {
     const name = req.query.name
-    const sql = `SELECT * FROM router`
+    let sql = `SELECT * FROM router`
     if(name) {
-        const sql = `SELECT * FROM router WHERE name LIKE '%${name}%'`
+         sql = `SELECT * FROM router WHERE name LIKE '%${name}%'`
     }
     try {
         const results = await query(sql)
