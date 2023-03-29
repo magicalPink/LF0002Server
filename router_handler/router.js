@@ -40,8 +40,9 @@ exports.getMenuList = async (req, res) => {
         if(req.user.authority != 'admin') {
             let authority = req.user.authority.split(',')
             menuData = results.filter(item => {
-                return item.jurisdiction == 0 || authority.includes(item.id)
+                return item.authority == 0 || authority.includes(item.id)
             })
+
         } else {
             menuData = results
         }
