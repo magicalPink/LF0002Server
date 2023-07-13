@@ -46,7 +46,6 @@ exports.getMenuList = async (req, res) => {
         } else {
             menuData = results
         }
-        console.log(results)
         const treeData = buildTree(menuData)
         res.send({
             status: 0,
