@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('./config');
 const roomUtils = require('./roomUtils');
 // 在线用户列表
-const onlineUsers = [];
+let onlineUsers = [];
 // 创建一个 WebSocket 服务
 const wsServer = io.createServer(function (conn) {
     // 解析连接的查询参数
@@ -29,7 +29,7 @@ const wsServer = io.createServer(function (conn) {
             connection: conn, // 连接对象
             loginTime: Date.now(), // 登录时间
         };
-
+        onlineUsers = onlineUsers.filter(u => u.id !== user.id);
         onlineUsers.push(user);
 
         // 当连接断开时从在线用户列表中移除
@@ -65,12 +65,12 @@ const wsServer = io.createServer(function (conn) {
             console.log(message)
             if (message.type === 'createRoom') {
                 let id = new Date().getTime();
-                roomUtils.createRoom(id, user.nickname + '的房间', 2, 0, 0, [], []);
-                roomUtils.joinTheRoom(id, decoded);
+                roomUtils.createRoom(id, user.nickname + '的房间', 2, 0, 0, []);
+                roomUtils.joinTheRoom(id, decoded,broadcastMessageById,1);
                 broadcastMessage({ type: 'roomList', roomId: id, roomList: roomUtils.readRoomData() });
             }
             if (message.type === 'joinRoom') {
-                roomUtils.joinTheRoom(message.roomId, decoded,broadcastMessageById);
+                roomUtils.joinTheRoom(message.roomId, decoded,broadcastMessageById,0);
                 broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
             }
             if (message.type === 'leaveRoom') {
@@ -81,8 +81,33 @@ const wsServer = io.createServer(function (conn) {
                 roomUtils.setMessage(message.roomId, decoded, message.message);
                 let room = roomUtils.readRoomData().find(room => room.roomId === message.roomId);
                 room.userList.forEach(user => broadcastMessageById({type:'chatList',chatList:room.chatList},user.id))
-
                 // broadcastMessage({ type: 'chatList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+            }
+            if(message.type === 'ready') {
+                roomUtils.setReady(message.roomId, decoded,true,broadcastMessageById);
+                broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+            }
+            if(message.type === 'unready') {
+                roomUtils.setReady(message.roomId, decoded,false,broadcastMessageById);
+                broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+            }
+            if(message.type === 'startGame') {
+                roomUtils.startGame(message.roomId, decoded,broadcastMessageById);
+                broadcastMessage({ type: 'message', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+            }
+            if(message.type === 'drop') {
+                roomUtils.drop(message.info, decoded,broadcastMessageById);
+            }
+            if(message.type === 'remind') {
+                let room = roomUtils.readRoomData().find(room => room.roomId === message.roomId);
+                room.userList.forEach(user => {
+                    if(user.id !== decoded.id) {
+                        broadcastMessageById({type:'warning',message:'花都等谢了，麻溜的下！'},user.id)
+                    }
+                })
+            }
+            if(message.type === 'giveUp') {
+                roomUtils.giveUp(message.roomId, decoded,message.role,broadcastMessageById);
             }
         })
     });
