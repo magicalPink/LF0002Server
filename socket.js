@@ -69,6 +69,9 @@ const wsServer = io.createServer(function (conn) {
                 roomUtils.joinTheRoom(id, decoded,broadcastMessageById,1);
                 broadcastMessage({ type: 'roomList', roomId: id, roomList: roomUtils.readRoomData() });
             }
+            if(message.type === 'getRoomList') {
+                broadcastMessage({ type: 'roomList', roomList: roomUtils.readRoomData() });
+            }
             if (message.type === 'joinRoom') {
                 roomUtils.joinTheRoom(message.roomId, decoded,broadcastMessageById,0);
                 broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
