@@ -83,6 +83,7 @@ function joinTheRoom(roomId, userInfo, callBack, role) {
         console.log(`房间 ${roomId} 加入成功`);
     } else {
         console.log(`未找到房间 ${roomId}`);
+        callBack({type: 'error', message: '未找到房间'}, userInfo.id)
     }
 }
 
@@ -138,6 +139,7 @@ function setReady(roomId, userInfo, ready, callBack) {
                 }
             }
         })
+        roomData[index].userList.forEach(user => callBack({type: 'ready', userList: roomData[index].userList}, user.id))
         writeRoomData(roomData);
     } else {
         console.log(`未找到房间 ${roomId}`);

@@ -70,7 +70,7 @@ const wsServer = io.createServer(function (conn) {
                 broadcastMessage({ type: 'roomList', roomId: id, roomList: roomUtils.readRoomData() });
             }
             if(message.type === 'getRoomList') {
-                broadcastMessage({ type: 'roomList', roomList: roomUtils.readRoomData() });
+                broadcastMessageById({ type: 'roomList', roomList: roomUtils.readRoomData() },decoded.id);
             }
             if (message.type === 'joinRoom') {
                 roomUtils.joinTheRoom(message.roomId, decoded,broadcastMessageById,0);
@@ -88,15 +88,15 @@ const wsServer = io.createServer(function (conn) {
             }
             if(message.type === 'ready') {
                 roomUtils.setReady(message.roomId, decoded,true,broadcastMessageById);
-                broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+                // broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
             }
             if(message.type === 'unready') {
                 roomUtils.setReady(message.roomId, decoded,false,broadcastMessageById);
-                broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+                // broadcastMessage({ type: 'roomList', roomId: message.roomId, roomList: roomUtils.readRoomData() });
             }
             if(message.type === 'startGame') {
                 roomUtils.startGame(message.roomId, decoded,broadcastMessageById);
-                broadcastMessage({ type: 'message', roomId: message.roomId, roomList: roomUtils.readRoomData() });
+                // broadcastMessage({ type: 'message', roomId: message.roomId, roomList: roomUtils.readRoomData() });
             }
             if(message.type === 'drop') {
                 roomUtils.drop(message.info, decoded,broadcastMessageById);
