@@ -112,6 +112,18 @@ const wsServer = io.createServer(function (conn) {
             if(message.type === 'giveUp') {
                 roomUtils.giveUp(message.roomId, decoded,message.role,broadcastMessageById);
             }
+            if(message.type === 'begEegret') {
+                // roomUtils.regret(message.roomId, decoded,message.role,broadcastMessageById);
+                let room = roomUtils.readRoomData().find(room => room.roomId === message.roomId);
+                room.userList.forEach(user => {
+                    if(user.id !== decoded.id) {
+                        broadcastMessageById({type:'regret',message:'悔棋'},user.id)
+                    }
+                })
+            }
+            if(message.type === 'regret') {
+                roomUtils.regret(message.roomId, decoded,message.consent,broadcastMessageById);
+            }
         })
     });
 });

@@ -33,6 +33,7 @@ function createRoom(roomId, name, playerNum, status, currentNum, chatList) {
         currentNum,
         chatList,
         ending: null,
+        lastPiece: {},
         gameList: checkerboard,
         currentUser: 1,
         userList: [],
@@ -164,7 +165,8 @@ function drop(info, userInfo, callBack) {
     const index = roomData.findIndex((room) => room.roomId === info.roomId);
     if (index !== -1) {
         roomData[index].gameList[info.x][info.y] = info.role;
-        roomData[index].currentUser = info.role === 1 ? 0 : 1;
+        roomData[index].lastPiece = info
+        roomData[index].currentUser = info.role == 1 ? 0 : 1;
         roomData[index].steps.push({x: info.x, y: info.y, role: info.role});
         let ending = checkWin(roomData[index].gameList);
         if(ending !== -1) {
@@ -173,7 +175,7 @@ function drop(info, userInfo, callBack) {
             roomData[index].ending = ending;
             roomData[index].userList.forEach(user => callBack({type: 'gameOver', ending}, user.id))
         }
-        roomData[index].userList.forEach(user => callBack({type: 'drop', info}, user.id))
+        roomData[index].userList.forEach(user => callBack({type: 'drop', info:roomData[index].lastPiece}, user.id))
         writeRoomData(roomData);
     } else {
         console.log(`未找到房间 ${info.roomId}`);
@@ -237,6 +239,38 @@ function giveUp(roomId, userInfo,role, callBack) {
     }
 }
 
+function regret(roomId, userInfo,consent, callBack) {
+    let roomData = readRoomData();
+    const index = roomData.findIndex((room) => room.roomId === roomId);
+    if (index !== -1) {
+        if(consent) {
+            const lastStep = roomData[index].steps.pop();
+            roomData[index].gameList[lastStep.x][lastStep.y] = 9;
+            roomData[index].currentUser = lastStep.role;
+            roomData[index].lastPiece = roomData[index].steps[roomData[index].steps.length - 1] || {};
+            roomData[index].userList.forEach(user => {
+                if(user.id !== userInfo.id) {
+                    callBack({type: 'success', message: '对方同意你的悔棋'}, user.id)
+                }
+                callBack({type: 'regretTrue', roomData: {
+                    gameList: roomData[index].gameList,
+                    currentUser: roomData[index].currentUser,
+                    lastPiece: roomData[index].lastPiece,
+                }}, user.id)
+            })
+        } else {
+            roomData[index].userList.forEach(user => {
+                if(user.id !== userInfo.id) {
+                    callBack({type: 'error', message: '对方拒绝你的悔棋'}, user.id)
+                }
+            })
+        }
+        writeRoomData(roomData);
+    } else {
+        console.log(`未找到房间 ${roomId}`);
+    }
+}
+
 
 // 导出方法
 module.exports = {
@@ -250,5 +284,6 @@ module.exports = {
     setReady,
     startGame,
     drop,
-    giveUp
+    giveUp,
+    regret
 };
