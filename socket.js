@@ -63,6 +63,13 @@ const wsServer = io.createServer(function (conn) {
             console.log('接收到用户发送的消息:', data);
             let message = JSON.parse(data);
             console.log(message)
+            if(message.type === 'logOut') {
+                let room = roomUtils.readRoomData().find(item => item.userList.find(user => user.id === user.id));
+                if (room) {
+                    roomUtils.leaveTheRoom(room.roomId, user, broadcastMessageById);
+                    broadcastMessage({ type: 'roomList', roomList: roomUtils.readRoomData() });
+                }
+            }
             if (message.type === 'createRoom') {
                 let id = new Date().getTime();
                 roomUtils.createRoom(id, user.nickname + '的房间', 2, 0, 0, []);

@@ -75,7 +75,7 @@ function joinTheRoom(roomId, userInfo, callBack, role) {
             userName: userInfo.userName,
             ready: role === 1,
             role,
-            step: 0,
+            score: 0,
         });
         // 删除掉没有人的房间
         roomData = roomData.filter((room) => room.userList.length)
@@ -175,7 +175,14 @@ function drop(info, userInfo, callBack) {
             console.log(ending)
             roomData[index].status = 2;
             roomData[index].ending = ending;
-            roomData[index].userList.forEach(user => callBack({type: 'gameOver', ending}, user.id))
+            roomData[index].userList.forEach(user => {
+                if (user.role === ending) {
+                    user.score += 1;
+                    callBack({type: 'success', message: '游戏结束，你赢了'}, user.id)
+                } else {
+                    callBack({type: 'error', message: '游戏结束，你输了'}, user.id)
+                }
+            })
         }
         roomData[index].userList.forEach(user => callBack({type: 'drop', info:roomData[index].lastPiece}, user.id))
         writeRoomData(roomData);
@@ -234,6 +241,11 @@ function giveUp(roomId, userInfo,role, callBack) {
     if (index !== -1) {
         roomData[index].status = 2;
         roomData[index].ending = role === 1 ? 0 : 1;
+        roomData[index].userList.forEach(user => {
+            if (user.role !== role) {
+                user.score += 1;
+            }
+        })
         roomData[index].userList.forEach(user => callBack({type: 'gameOver', ending: roomData[index].ending}, user.id))
         writeRoomData(roomData);
     } else {
