@@ -135,7 +135,7 @@ function setReady(roomId, userInfo, ready, callBack) {
                 if (ready) {
                     callBack({type: 'success', message: userInfo.nickname + '已经准备啦，可以开始游戏咯'}, user.id)
                 } else {
-                    callBack({type: 'success', message: userInfo.nickname + '取消准备了'}, user.id)
+                    callBack({type: 'warning', message: userInfo.nickname + '取消准备了'}, user.id)
                 }
             }
         })
