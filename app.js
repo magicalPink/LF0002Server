@@ -24,7 +24,7 @@ app.use(/^(?!\/api).*$/, (req, res, next) => {
     if (req.user) {
         redis.getAsync(req.user.id).then((token) => {
             if (token !== req.headers.authorization) {
-                res.status(401).send({status: 9, message: '账号已被其他用户登录，断开连接！'});
+                res.status(401).send({status: 9, message: '账号已被他人登录，断开连接！'});
             } else {
                 next();
             }
@@ -37,7 +37,7 @@ app.use(/^(?!\/api).*$/, (req, res, next) => {
 //捕获未授权的错误
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
-        res.status(401).send({ status: 9, message: '身份认证失败！' })
+        res.status(401).send({ status: 9, message: '当前登录已过期，请重新登录！' })
     }
 })
 
