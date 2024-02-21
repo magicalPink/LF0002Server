@@ -65,7 +65,7 @@ app.use('/router', routerInfo);
 //定时任务 删除过期用户
 setInterval(() => {
     onlineUser.deletingExpiredUsers()
-},5000)
+},10000)
 
 // 监听指定端口
 wsServer.listen(3001, () => {
