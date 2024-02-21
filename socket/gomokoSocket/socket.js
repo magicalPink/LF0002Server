@@ -8,7 +8,6 @@ let onlineUsers = [];
 const wsServer = io.createServer(function (conn) {
     // 解析连接的查询参数
     const token = conn.path.split('?')[1].split('=')[1].split('%20')[1];
-    console.log(token);
 
     // 根据 token 进行用户身份验证，识别连接的用户
     jwt.verify(token, config.jwtSecretKey, (err, decoded) => {
@@ -29,7 +28,9 @@ const wsServer = io.createServer(function (conn) {
             connection: conn, // 连接对象
             loginTime: Date.now(), // 登录时间
         };
+
         onlineUsers = onlineUsers.filter(u => u.id !== user.id);
+
         onlineUsers.push(user);
 
         // 当连接断开时从在线用户列表中移除

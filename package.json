@@ -18,6 +18,7 @@
     "express-jwt": "^5.3.3",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
-    "nodejs-websocket": "^1.7.2"
+    "nodejs-websocket": "^1.7.2",
+    "redis": "^3.1.2"
   }
 }

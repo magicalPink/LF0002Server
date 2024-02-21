@@ -2,6 +2,8 @@ const db = require('../db/index')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const tokenStr = require('../config')
+const redis = require('../utils/redis-client');
+
 // 查询sql
 const searchNameSql = `SELECT * FROM users WHERE username = ?`
 // 插入数据sql
@@ -54,6 +56,7 @@ exports.login = (req, res) => {
             const token = jwt.sign(user, tokenStr.jwtSecretKey, { expiresIn:tokenStr.expiresIn })
             //解密登录
             if(bcrypt.compareSync(userInfo.password, results[0].password)) {
+                redis.client.setex(user.id,28800,'Bearer ' + token)
                 return res.send({
                     status: 0,
                     message: '登录成功！',

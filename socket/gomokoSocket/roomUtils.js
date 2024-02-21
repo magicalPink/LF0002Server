@@ -1,5 +1,5 @@
 const fs = require('fs');
-const checkerboard = require('./checkerboard');
+const checkerboard = require('../../checkerboard');
 
 // 读取房间信息
 function readRoomData() {
@@ -178,10 +178,8 @@ function drop(info, userInfo, callBack) {
             roomData[index].userList.forEach(user => {
                 if (user.role === ending) {
                     user.score += 1;
-                    callBack({type: 'success', message: '游戏结束，你赢了'}, user.id)
-                } else {
-                    callBack({type: 'error', message: '游戏结束，你输了'}, user.id)
                 }
+                callBack({type: 'gameOver', ending}, user.id)
             })
         }
         roomData[index].userList.forEach(user => callBack({type: 'drop', info:roomData[index].lastPiece}, user.id))

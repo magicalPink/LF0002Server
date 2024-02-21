@@ -6,10 +6,11 @@ const config = require('./config')
 const expressJWT = require('express-jwt')
 //创建 express 实例
 const app = express();
-// 创建一个websocket服务
-// const server = require('http').createServer(app)
 // 导入nodejs-websocket模块
-const wsServer = require('./socket')
+const wsServer = require('./socket/baseSocket/socket')
+//在线用户方法
+const onlineUser = require('./utils/onlineUser-redis');
+const redis = require('./utils/redis-client');
 
 //使用 cors 中间件
 app.use(cors());
@@ -18,12 +19,28 @@ app.use(expressJWT({ secret: config.jwtSecretKey }).unless({ path: [/^\/api\//] 
 app.use(express.urlencoded({ extended: false }));
 //配置解析json数据
 app.use(express.json());
+// 验证token
+app.use(/^(?!\/api).*$/, (req, res, next) => {
+    if (req.user) {
+        redis.getAsync(req.user.id).then((token) => {
+            if (token !== req.headers.authorization) {
+                res.status(401).send({status: 9, message: '账号已被其他用户登录，断开连接！'});
+            } else {
+                next();
+            }
+        });
+    } else {
+        next();
+    }
+});
+
 //捕获未授权的错误
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
         res.status(401).send({ status: 9, message: '身份认证失败！' })
     }
 })
+
 //配置全局错误处理中间件
 app.use((req,res,next) => {
     res.cc = function(err,status = 1) {
@@ -39,14 +56,20 @@ app.use((req,res,next) => {
 const userRouter = require('./router/user');
 const userInfoRouter = require('./router/userinfo');
 const routerInfo = require('./router/router')
+
 //挂载路由
 app.use('/api', userRouter);
 app.use('/info', userInfoRouter);
 app.use('/router', routerInfo);
 
+//定时任务 删除过期用户
+setInterval(() => {
+    onlineUser.deletingExpiredUsers()
+},5000)
+
 // 监听指定端口
 wsServer.listen(3001, () => {
-    console.log('websocket服务启动成功，端口号为：3000')
+    console.log('socket基础服务启动成功，端口号为：3001')
 })
 //调用app.listen方法，指定端口号并启动web服务器
 app.listen(3000, function () {

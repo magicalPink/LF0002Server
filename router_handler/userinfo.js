@@ -7,7 +7,7 @@ exports.getUserInfo = (req, res) => {
             return res.cc(err)
         }
         if (results.length !== 1) {
-            return res.cc('获取用户信息失败！')
+            return res.cc(9,'获取用户信息失败！')
         }
         res.send({
             status: 0,
