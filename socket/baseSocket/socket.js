@@ -2,10 +2,13 @@ const io = require('nodejs-websocket')
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const onlineUser = require('../../utils/onlineUser-redis');
+const db = require("../../db");
 // 在线用户列表
 let onlineUsers = [];
 // 创建一个 WebSocket 服务
 const wsServer = io.createServer(function (conn) {
+    // 查询sql
+    const sql = `SELECT * FROM users WHERE id = ?`
     // 解析连接的查询参数
     const token = conn.path.split('?')[1]?.split('=')[1].split('%20')[1];
 
@@ -16,7 +19,6 @@ const wsServer = io.createServer(function (conn) {
             // JWT 验证失败
             return;
         }
-
         // 将用户添加到在线用户列表
         const user = {
             id: decoded.id,
@@ -25,28 +27,18 @@ const wsServer = io.createServer(function (conn) {
             connection: conn, // 连接对象
             loginTime: Date.now(), // 登录时间
         };
-
         onlineUsers = onlineUsers.filter(u => u.id !== user.id);
-
         onlineUsers.push(user);
-
-        onlineUser.addUser({
-            id: decoded.id,
-            username: decoded.username,
-            nickname: decoded.nickname,
-            avatar: decoded.avatar,
+        db.query(sql, user.id, (err, results) => {
+            onlineUser.addUser(results[0])
         })
-
         // 接收到用户发送的消息
         conn.on('text', (data) => {
             let message = JSON.parse(data);
             if(message.type === "ping") {
                 console.log('pingId：',decoded.id)
-                onlineUser.addUser({
-                    id: decoded.id,
-                    username: decoded.username,
-                    nickname: decoded.nickname,
-                    avatar: decoded.avatar,
+                db.query(sql, user.id, (err, results) => {
+                    onlineUser.addUser(results[0])
                 })
                 broadcastMessageById({ping:"心跳"},user.id)
             }
