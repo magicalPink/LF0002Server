@@ -68,7 +68,7 @@ app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 //定时任务 删除过期用户
 setInterval(() => {
     onlineUser.deletingExpiredUsers()
-},10000)
+},30000)
 
 // 监听指定端口
 wsServer.listen(3001, () => {
