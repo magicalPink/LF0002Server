@@ -34,6 +34,7 @@ const wsServer = io.createServer(function (conn) {
             id: decoded.id,
             username: decoded.username,
             nickname: decoded.nickname,
+            avatar: decoded.avatar,
         })
 
         // 接收到用户发送的消息
@@ -45,6 +46,7 @@ const wsServer = io.createServer(function (conn) {
                     id: decoded.id,
                     username: decoded.username,
                     nickname: decoded.nickname,
+                    avatar: decoded.avatar,
                 })
                 broadcastMessageById({ping:"心跳"},user.id)
             }

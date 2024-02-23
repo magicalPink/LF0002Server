@@ -1,4 +1,6 @@
 const db = require('../db/index')
+
+const onlineUser = require("../utils/onlineUser-redis")
 // 查询sql
 const sql = `SELECT * FROM users WHERE id = ?`
 
@@ -20,9 +22,8 @@ exports.getUserInfo = (req, res) => {
 
 //修改用户昵称
 exports.setNickname = (req, res) => {
-    const route = req.body
-    const id = route.id
-    const newNickname = route.nickname
+    const id = req.body.id
+    const newNickname = req.body.nickname
 
     // 更新SQL
     const updateSql = `UPDATE users SET nickname = ? WHERE id = ?`
@@ -43,9 +44,8 @@ exports.setNickname = (req, res) => {
 
 //修改用户头像
 exports.setAvatar = (req, res) => {
-    const route = req.body
-    const id = route.id
-    const newAvatar = route.avatar
+    const id = req.body.id
+    const newAvatar = req.body.avatar
 
     // 更新SQL
     const updateSql = `UPDATE users SET avatar = ? WHERE id = ?`
@@ -63,4 +63,15 @@ exports.setAvatar = (req, res) => {
         })
     })
 }
+
+//获取在线列表
+exports.getOnlineList = (req, res) => {
+    onlineUser.getList().then(list => {
+        res.send({
+            status: 0,
+            data: list
+        })
+    })
+}
+
 
