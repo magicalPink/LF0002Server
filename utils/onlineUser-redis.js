@@ -14,7 +14,7 @@ const onlineUser = {
             let oldUser = List[index]
             redis.removeFromArray('onlineUsers',oldUser)
         }
-        redis.pushToArray('onlineUsers', {...user,expirationTime: Date.now() + 10000})
+        redis.pushToArray('onlineUsers', {...user,expirationTime: Date.now() + 60000})
     },
     //删除过期用户
     async deletingExpiredUsers() {
