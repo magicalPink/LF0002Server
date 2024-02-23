@@ -4,7 +4,7 @@ const { promisify } = require('util');
 class RedisClient {
     constructor() {
         this.client = redis.createClient({
-            host: '124.222.235.110',
+            host: '111.229.200.218',
             port: 6379,
             password: '123456'
         });

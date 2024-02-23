@@ -1,5 +1,6 @@
 //导入  express 模块
 const express = require('express');
+const path = require('path');
 //导入 cors 模块
 const cors = require('cors');
 const config = require('./config')
@@ -61,6 +62,8 @@ const routerInfo = require('./router/router')
 app.use('/api', userRouter);
 app.use('/info', userInfoRouter);
 app.use('/router', routerInfo);
+//设置静态资源路径
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //定时任务 删除过期用户
 setInterval(() => {
