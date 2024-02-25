@@ -12,10 +12,12 @@ exports.getUserInfo = (req, res) => {
         if (results.length !== 1) {
             return res.cc(9,'获取用户信息失败！')
         }
+        let userInfo = results[0]
+        delete userInfo.password
         res.send({
             status: 0,
             message: '获取用户信息成功！',
-            data: results[0]
+            data: userInfo
         })
     })
 }

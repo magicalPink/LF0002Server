@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const onlineUser = require('../../utils/onlineUser-redis');
 const db = require("../../db");
+const GomokuFun = require("../../utils/gomoku")
 // 在线用户列表
 let onlineUsers = [];
 // 创建一个 WebSocket 服务
@@ -41,6 +42,12 @@ const wsServer = io.createServer(function (conn) {
                     onlineUser.addUser(results[0])
                 })
                 broadcastMessageById({ping:"心跳"},user.id)
+            }
+            if(message.Game) {
+                //五子棋
+                if(message.Game === "Gomoku") {
+                    GomokuFun(message,broadcastMessageById)
+                }
             }
         });
 

@@ -16,6 +16,7 @@ class RedisClient {
         // 将某些Redis函数转换为Promise形式，以便我们可以使用async/await
         this.getAsync = promisify(this.client.get).bind(this.client);
         this.setAsync = promisify(this.client.set).bind(this.client);
+        this.setexAsync = promisify(this.client.setex).bind(this.client);
         this.lpushAsync = promisify(this.client.lpush).bind(this.client);
         this.lrangeAsync = promisify(this.client.lrange).bind(this.client);
         this.rpushAsync = promisify(this.client.rpush).bind(this.client);
@@ -30,6 +31,11 @@ class RedisClient {
     async setObject(key, obj) {
         const value = JSON.stringify(obj);
         await this.setAsync(key, value);
+    }
+
+    async setexObject(key, time,obj) {
+        const value = JSON.stringify(obj);
+        await this.setexAsync(key,time, value);
     }
 
     async getObject(key) {
