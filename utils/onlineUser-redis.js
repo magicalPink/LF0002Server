@@ -6,15 +6,36 @@ const onlineUser = {
         const value = await redis.getList('onlineUsers')
         return value.map(item => JSON.parse(item))
     },
-    //添加用户
-    async addUser(user) {
+    //修改用户状态
+    async setUserState(user,state) {
         let List = await this.getList()
         index = List.findIndex(u => u.id === user.id);
         if(index !== -1) {
             let oldUser = List[index]
             redis.removeFromArray('onlineUsers',oldUser)
         }
-        redis.pushToArray('onlineUsers', {...user,expirationTime: Date.now() + 60000})
+        let newUser = {
+            ...user,
+            expirationTime: Date.now() + 60000,
+            state,
+        }
+        redis.pushToArray('onlineUsers', newUser)
+    },
+    //添加用户
+    async addUser(user) {
+        let List = await this.getList()
+        index = List.findIndex(u => u.id === user.id);
+        let oldUser = List[index]
+        if(index !== -1) {
+            redis.removeFromArray('onlineUsers',oldUser)
+        }
+        //继承老用户状态
+        let newUser = {
+            ...user,
+            expirationTime: Date.now() + 60000,
+            state:oldUser?.state,
+        }
+        redis.pushToArray('onlineUsers', newUser)
     },
     //删除过期用户
     async deletingExpiredUsers() {
