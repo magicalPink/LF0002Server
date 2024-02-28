@@ -6,6 +6,11 @@ const onlineUser = {
         const value = await redis.getList('onlineUsers')
         return value.map(item => JSON.parse(item))
     },
+    //获取在线列表
+    async getUser(id) {
+        const value = await this.getList()
+        return value.find(item => item.id === id)
+    },
     //修改用户状态
     async setUserState(user,state) {
         let List = await this.getList()

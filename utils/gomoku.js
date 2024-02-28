@@ -42,6 +42,7 @@ const GomokuFun = (message,callback) => {
     if(message.type == "joinRoom") {
         redis.getAsync('Gomoku:' + message.roomId).then(res => {
             if(!res) {
+                onlineUser.setUserState(user)
                 return callback({Game:'Gomoku',type:'errorMessage',message:'房间已失效'},user.id)
             }
             let roomData = JSON.parse(res)
@@ -72,6 +73,7 @@ const GomokuFun = (message,callback) => {
     if(message.type == "leave") {
         redis.getAsync(message.roomId).then(res => {
             if(!res) {
+                onlineUser.setUserState(user)
                 return callback({Game:'Gomoku',type:'errorMessage',message:'房间已失效'},user.id)
             }
             let roomData = JSON.parse(res)
@@ -89,13 +91,27 @@ const GomokuFun = (message,callback) => {
 
     //邀请
     if(message.type == "invite") {
-        callback({Game:'Gomoku',type:'invite',roomId:message.roomId,message:user.nickname + '邀请你加入他的五子棋对局'},message.inviteUserId)
+        onlineUser.getUser(message.inviteUserId).then(res => {
+            if(res) {
+                //用户在线
+                if(!res.state) {
+                    callback({Game:'Gomoku',type:'invite',roomId:message.roomId,message:user.nickname + '邀请你加入他的五子棋对局'},message.inviteUserId)
+                } else {
+                    callback({Game:'Gomoku',type:'errorMessage',message:'用户在游戏中'},user.id)
+                }
+            } else {
+                //用户离线
+                callback({Game:'Gomoku',type:'errorMessage',message:'用户已离线'},user.id)
+            }
+            console.log(res)
+        })
     }
 
     //开始游戏
     if(message.type == "start") {
         redis.getAsync(message.roomId).then(res => {
             if(!res) {
+                onlineUser.setUserState(user)
                 return callback({Game:'Gomoku',type:'errorMessage',message:'房间已失效'},user.id)
             }
             let roomData = JSON.parse(res)
@@ -118,6 +134,26 @@ const GomokuFun = (message,callback) => {
                 callback({Game:'Gomoku',type:'roomData',...roomData},item.id)
             })
             redis.setexObject(roomData.roomId,3000,roomData);
+        })
+    }
+
+    //开始游戏
+    if(message.type == "drop") {
+        redis.getAsync(message.roomId).then(res => {
+            if(!res) {
+                onlineUser.setUserState(user)
+                return callback({Game:'Gomoku',type:'errorMessage',message:'房间已失效'},user.id)
+            }
+            let roomData = JSON.parse(res)
+            //空格
+            if(roomData.chessboard[message.drop.x][message.drop.y] === 9) {
+                roomData.chessboard[message.drop.x][message.drop.y] = message.drop.chess
+                roomData.currentUser = message.opponentId
+                redis.setexObject(roomData.roomId,3000,roomData);
+                roomData.userList.forEach(item => {
+                    callback({Game:'Gomoku',type:'roomData',...roomData},item.id)
+                })
+            }
         })
     }
 }
