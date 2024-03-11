@@ -285,6 +285,20 @@ const GomokuFun = (message,callback) => {
             }
         })
     }
+
+    //表情
+    if(message.type == "meme") {
+        redis.getAsync(message.roomId).then(res => {
+            if(!res) {
+                onlineUser.setUserState(user)
+                return callback({Game:'Gomoku',type:'errorMessage',message:'房间已失效'},user.id)
+            }
+            let roomData = JSON.parse(res)
+            roomData.userList.forEach(item => {
+                callback({Game:'Gomoku',type:'meme',memeData:{userId:user.id,memeIndex:message.memeIndex}},item.id)
+            })
+        })
+    }
 }
 
 module.exports = GomokuFun
